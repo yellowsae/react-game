@@ -1,6 +1,12 @@
 
+import Board from "./Board"
+
 const App = () => {
-  return <button className="square">X</button>
+  return (
+    <>
+      <Board />
+    </>
+  )
 }
 
 
