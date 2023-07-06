@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { ReactElement, useState } from "react"
 
 
 interface SquareProps {
@@ -20,19 +20,28 @@ const Square = (props: SquareProps) => {
   )
 }
 
-const Board = () => {
+interface BoardProps {
+  squares: (string | null)[],
+  xIsNext: boolean,
+  onPlay: (nextSquares: (string | null)[]) => void
+}
+
+const Board = (props: BoardProps) => {
+
+  const { xIsNext, squares, onPlay } = props
+
   // 状态提升 
   // 将子组件的状态提升到父组件中
-  const [square, setSquare] = useState<(string | null)[]>(Array(9).fill(null))
+  // const [square, setSquare] = useState<(string | null)[]>(Array(9).fill(null))
 
   // 交替落子
-  const [xIsNext, setXIsNext] = useState<boolean>(true)
+  // const [xIsNext, setXIsNext] = useState<boolean>(true)
 
   // 更新 state 的方法
   const handleClick = (i: number) => {
     // 如果 Square 组件已经有了值
     // 或者已经有玩家获胜
-    if (square[i] || calculateWinner(square)) {
+    if (squares[i] || calculateWinner(squares)) {
       return
     }
 
@@ -58,7 +67,7 @@ const Board = () => {
      *  
      * 
      */
-    const nextSquare = square.slice()
+    const nextSquare = squares.slice()
 
     // 交替落子 
     if (xIsNext) {
@@ -68,20 +77,19 @@ const Board = () => {
       nextSquare[i] = 'O'
     }
 
+    // 使用 onPlay 方法来更新 state
+    onPlay(nextSquare)
+
     // 更新 state
-    setSquare(nextSquare)
+    // setSquare(nextSquare)
 
     // 更新 xIsNext
-    setXIsNext(!xIsNext)
+    // setXIsNext(!xIsNext)
   }
 
-  // 重置棋盘
-  const clearSquare = () => {
-    setSquare(Array(9).fill(null))
-  }
 
   // 获胜玩家 的提示
-  const winner: string | null = calculateWinner(square)
+  const winner: string | null = calculateWinner(squares)
   let status: string;
   if (winner) {
     status = 'Winner: ' + winner;
@@ -94,29 +102,98 @@ const Board = () => {
     <>
       <div className="font-bold">{status}</div>
       <div className="board">
-        <Square value={square[0]} onSquareClick={
+        <Square value={squares[0]} onSquareClick={
           // 改为 () => handleClick(0) : 为了避免在渲染时就调用 handleClick，而是在点击时才调用
           // 如果是之前的 handleClick(0) : 则会在渲染时就调用 handleClick
           () => handleClick(0)
         }
         />
-        <Square value={square[1]} onSquareClick={() => handleClick(1)} />
-        <Square value={square[2]} onSquareClick={() => handleClick(2)} />
+        <Square value={squares[1]} onSquareClick={() => handleClick(1)} />
+        <Square value={squares[2]} onSquareClick={() => handleClick(2)} />
       </div>
       <div className="board">
-        <Square value={square[3]} onSquareClick={() => handleClick(3)} />
-        <Square value={square[4]} onSquareClick={() => handleClick(4)} />
-        <Square value={square[5]} onSquareClick={() => handleClick(5)} />
+        <Square value={squares[3]} onSquareClick={() => handleClick(3)} />
+        <Square value={squares[4]} onSquareClick={() => handleClick(4)} />
+        <Square value={squares[5]} onSquareClick={() => handleClick(5)} />
       </div>
       <div className="board">
-        <Square value={square[6]} onSquareClick={() => handleClick(6)} />
-        <Square value={square[7]} onSquareClick={() => handleClick(7)} />
-        <Square value={square[8]} onSquareClick={() => handleClick(8)} />
-      </div>
-      <div>
-        <button onClick={clearSquare} className="">Rest</button>
+        <Square value={squares[6]} onSquareClick={() => handleClick(6)} />
+        <Square value={squares[7]} onSquareClick={() => handleClick(7)} />
+        <Square value={squares[8]} onSquareClick={() => handleClick(8)} />
       </div>
     </>
+  )
+}
+
+
+
+const Game = () => {
+
+  // 存储 state 玩家落子的数据
+  const [history, setHistory] = useState<any>([Array(9).fill(null)])
+
+  // 用户当前正在查看的步骤
+  const [currentMove, setCurrentMove] = useState<number>(0)
+
+  const xIsNext: boolean = (currentMove % 2) === 0
+
+  // 取出当前的棋盘数据， 也就要渲染的数据
+  // const currentSquares = history[history.length - 1]
+  const currentSquares = history[currentMove]
+
+  // 存储 state 历史落子的数据
+  const handlePlay = (nextSquares: (string | null)[]) => {
+    // TODO
+    // 你现在正在使用 history state 变量来存储这些信息
+    // setHistory([...history, nextSquares])
+
+    // 修改 回到过去 的某个步骤
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares]
+    setHistory(nextHistory)
+
+    // 每次落子时，你都需要更新 currentMove 以指向最新的历史条目。
+    setCurrentMove(nextHistory.length - 1)
+
+    // setXIsNext(!xIsNext)
+  }
+
+
+  // jumpTo 方法 - 跳转到历史记录中的某一步
+  const jumpTo = (nextMove: number) => {
+    // 正在查看的步骤
+    setCurrentMove(nextMove)
+
+    // 如果你将 currentMove 更改为偶数，你还将设置 xIsNext 为 true。
+    // setXIsNext(nextMove % 2 === 0)
+  }
+
+  // 显示历史记录
+  const moves = history.map((_squares: (string | null)[], move: number) => {
+    let description;
+    if (move > 0) {
+      // 提示信息
+      description = 'Go to move #' + move;
+    } else {
+      description = 'Go to game start';
+    }
+    return (
+      <li key={move}>
+        <button onClick={() => jumpTo(move)} >{description}</button>
+      </li>
+    )
+  })
+
+  return (
+    <div className="game">
+      <div className="game-board">
+        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+      </div>
+      <div className="game-info">
+        <ol>
+          {moves}
+        </ol>
+      </div>
+    </div>
   )
 }
 
@@ -145,4 +222,4 @@ function calculateWinner(squares: (string | null)[]) {
   return null
 }
 
-export default Board
+export default Game
