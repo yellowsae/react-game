@@ -5,15 +5,19 @@ import { useState } from "react"
 interface SquareProps {
   // value: X | O | null
   value: string | null,
-  onSquareClick: () => void
+  onSquareClick: () => void,
+  isWinnerSquare: boolean | null
 }
 
 const Square = (props: SquareProps) => {
-  const { value, onSquareClick } = props
+  const { value, onSquareClick, isWinnerSquare } = props
+
+  const winnerClassName = isWinnerSquare ? 'text-red-600' : ''
+
   return (
     <button
       onClick={onSquareClick}
-      className="square text-black-600 font-bold w-5 h-5 m-1 text-center text-gray-600 border border-gray-300"
+      className={`square text-black-600 font-bold w-5 h-5 m-1 text-center text-gray-600 border border-gray-300 ${winnerClassName}`}
     >{value}
     </button>
 
@@ -89,10 +93,18 @@ const Board = (props: BoardProps) => {
 
 
   // 获胜玩家 的提示
-  const winner: string | null = calculateWinner(squares)
+  // const winner: string | null = calculateWinner(squares)
+  const winner: any = calculateWinner(squares)
   let status: string;
-  if (winner) {
-    status = 'Winner: ' + winner;
+
+
+
+  if (winner?.length > 0) {
+    // 获胜玩家 的提示
+    status = 'Winner: ' + squares[winner[0]];
+  } else if (squares.every(item => item !== null)) {
+    // 平局 的提示
+    status = 'Draw'
   } else {
     // 交替落子
     status = 'Next player: ' + (xIsNext ? 'X' : 'O')
@@ -104,8 +116,10 @@ const Board = (props: BoardProps) => {
 
   // 2.1 render 方法
   const renderSquare = (i: number) => {
+    // 判断方块是否为获胜方块
+    const isWinnerSquare = winner && winner.includes(i)
     return (
-      <Square value={squares[i]} onSquareClick={() => handleClick(i)} />
+      <Square value={squares[i]} onSquareClick={() => handleClick(i)} isWinnerSquare={isWinnerSquare} />
     )
   }
   // 设置棋盘大小 
@@ -280,7 +294,10 @@ function calculateWinner(squares: (string | null)[]) {
     // 如果有玩家获胜
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
       // 返回获胜玩家
-      return squares[a];
+      // return squares[a];
+      // 每当有人获胜时，高亮显示连成一线的三个方格。
+      // - 返回获胜的三个方格的下标
+      return [a, b, c]
     }
   }
   return null
