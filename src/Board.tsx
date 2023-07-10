@@ -119,7 +119,7 @@ const Board = (props: BoardProps) => {
     // 判断方块是否为获胜方块
     const isWinnerSquare = winner && winner.includes(i)
     return (
-      <Square value={squares[i]} onSquareClick={() => handleClick(i)} isWinnerSquare={isWinnerSquare} />
+      <Square key={i} value={squares[i]} onSquareClick={() => handleClick(i)} isWinnerSquare={isWinnerSquare} />
     )
   }
   // 设置棋盘大小 
@@ -234,9 +234,13 @@ const Game = () => {
   // 显示历史记录
   const moves = history.map((_squares: (string | null)[], move: number) => {
     let description;
+    // 定义行 
+    const row = Math.floor(move / 3)
+    // 定义列
+    const col = move % 3
     if (move > 0) {
       // 提示信息
-      description = 'Go to move #' + move;
+      description = 'Go to move #' + move + ' (' + row + ', ' + col + ')';
     } else {
       description = 'Go to game start';
     }
