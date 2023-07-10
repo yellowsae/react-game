@@ -174,6 +174,10 @@ const Game = () => {
   // const currentSquares = history[history.length - 1]
   const currentSquares = history[currentMove]
 
+  // 3. 添加一个切换按钮，允许您以升序或降序对历史记录进行排序。
+  // 增加排序的状态
+  const [isAscending, setIsAscending] = useState<boolean>(true)
+
   // 存储 state 历史落子的数据
   const handlePlay = (nextSquares: (string | null)[]) => {
     // TODO
@@ -234,12 +238,21 @@ const Game = () => {
     )
   })
 
+
+  // 增加排序的状态
+  if (!isAscending) {
+    moves.reverse()
+  }
+
   return (
     <div className="game">
       <div className="game-board">
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
       <div className="game-info">
+        <button className="btn" onClick={() => setIsAscending(!isAscending)}>
+          {isAscending ? '降序' : '升序'}
+        </button>
         <ol>
           {moves}
         </ol>
