@@ -98,10 +98,43 @@ const Board = (props: BoardProps) => {
     status = 'Next player: ' + (xIsNext ? 'X' : 'O')
   }
 
+
+
+  // 2. 重写 Board 组件，使用两个循环来制作方格，而不是在代码中写死它们。
+
+  // 2.1 render 方法
+  const renderSquare = (i: number) => {
+    return (
+      <Square value={squares[i]} onSquareClick={() => handleClick(i)} />
+    )
+  }
+  // 设置棋盘大小 
+  const boardSize = 3
+
+  // 存储 renderSquare 方法返回的 JSX 元素
+  const squaresList: JSX.Element[] = []
+
+  // 循环 
+  for (let i = 0; i < boardSize; i++) {
+    // 存储每一行的 JSX 元素
+    const row: JSX.Element[] = []
+
+    for (let j = 0; j < boardSize; j++) {
+      // index 为每一个方格的索引
+      const index = i * boardSize + j
+
+      row.push(renderSquare(index))
+    }
+    // 添加每一行的 JSX 元素
+    squaresList.push(<div className="board-row" key={i}>{row}</div>)
+  }
+
+
   return (
     <>
       <div className="font-bold">{status}</div>
-      <div className="board">
+      {squaresList}
+      {/* <div className="board">
         <Square value={squares[0]} onSquareClick={
           // 改为 () => handleClick(0) : 为了避免在渲染时就调用 handleClick，而是在点击时才调用
           // 如果是之前的 handleClick(0) : 则会在渲染时就调用 handleClick
@@ -120,7 +153,7 @@ const Board = (props: BoardProps) => {
         <Square value={squares[6]} onSquareClick={() => handleClick(6)} />
         <Square value={squares[7]} onSquareClick={() => handleClick(7)} />
         <Square value={squares[8]} onSquareClick={() => handleClick(8)} />
-      </div>
+      </div> */}
     </>
   )
 }
@@ -168,6 +201,9 @@ const Game = () => {
   }
 
   // 1. 仅针对当前着手，显示“You are at move #…”而不是按钮。
+  //  - 其实就是不显示按钮， 只显示文字
+
+
   // 2. 对于每个历史记录按钮，将其格式更改为（行，列）格式，而不是数字。
   // 3. 在历史记录列表中加粗当前选择的项目。
   // 4. 重写 Board 组件，使用两个循环来制作方格，而不是在代码中写死它们。
