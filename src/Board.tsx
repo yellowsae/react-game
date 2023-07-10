@@ -1,5 +1,5 @@
 
-import { ReactElement, useState } from "react"
+import { useState } from "react"
 
 
 interface SquareProps {
@@ -167,6 +167,16 @@ const Game = () => {
     // setXIsNext(nextMove % 2 === 0)
   }
 
+  // 1. 仅针对当前着手，显示“You are at move #…”而不是按钮。
+  // 2. 对于每个历史记录按钮，将其格式更改为（行，列）格式，而不是数字。
+  // 3. 在历史记录列表中加粗当前选择的项目。
+  // 4. 重写 Board 组件，使用两个循环来制作方格，而不是在代码中写死它们。
+  // 5. 添加一个切换按钮，允许您以升序或降序对历史记录进行排序。
+  // 6. 每当有人获胜时，高亮显示连成一线的三个方格。
+  // 7. 当无人获胜时，显示一个平局的消息。
+
+
+
   // 显示历史记录
   const moves = history.map((_squares: (string | null)[], move: number) => {
     let description;
@@ -178,7 +188,12 @@ const Game = () => {
     }
     return (
       <li key={move}>
-        <button onClick={() => jumpTo(move)} >{description}</button>
+        {/* // 1. 仅针对当前着手，显示“You are at move #…”而不是按钮。 */}
+        {
+          move === currentMove ? (
+            <strong>“You are at move  #{move}”</strong>
+          ) : (<button onClick={() => jumpTo(move)} >{description}</button>)
+        }
       </li>
     )
   })
